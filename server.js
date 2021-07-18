@@ -6,6 +6,10 @@ const app = express();
 //connect Database
 connectDB();
 
+// Init Middleware
+app.use(express.json({ extended: false }));
+// Now we can accept data or a request's body
+
 app.get("/", (req, res) => res.json({ msg: "hello world..." }));
 
 //Define Routes
