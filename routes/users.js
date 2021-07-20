@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
 
+const jwt = require("jsonwebtoken");
+
 const User = require("../models/User");
 
 const { check, validationResult } = require("express-validator");
 
 const bcrypt = require("bcryptjs");
+
+const config = require("config");
 
 /* POST api/users, means it will be using this route since in server.js we have:
 app.use("/api/users", require("./routes/users"));
@@ -59,7 +63,27 @@ router.post(
 
       await user.save();
 
-      res.send("User saved");
+      const payload = {
+        user: {
+          // this id is added by mongodb atlas when the object is added automatically
+          id: user.id,
+        },
+      };
+
+      // expiresIn means when to expire our session login or the jwt token and needs to be reinserted
+      jwt.sign(
+        payload,
+        config.get("jwtSecret"),
+        {
+          expiresIn: 360000,
+        },
+        (err, token) => {
+          if (err) throw err;
+          res.json({ token });
+          // copy the token in the postman post request you will find the user with its id created
+        }
+      );
+
       // you can check its saved in the mongodb atlas cluster and you will find the password hashed
     } catch (err) {
       console.error(err.message);
